@@ -565,15 +565,17 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 try:
                     sol = root_scalar(func, method='toms748', bracket = kmax)
                     k = sol.root
+                    Gcd = G1dB/(1-math.exp(-k*float(D1)))
+                    print(f'k = {k}, Gcd = {Gcd}')
+                    x2 = np.arange(self.dists_3[0]/100, self.dists_3[-1]/100, 0.10)
+                    self.approx = self.ax_4.plot(x2*100, Alfredo(k, Gcd, x2), label='Alfredo')
+                    self.line_Gain_Output.setText(f'{round(Gcd, 2)} dB')
                 except:
                     pass
                     QtWidgets.QMessageBox.information(None, QtWidgets.qApp.tr("Estimativa Erro"),
                                               QtWidgets.qApp.tr("Não foi possível achar uma solução para k = [0.1, 1000]"),
                                               QtWidgets.QMessageBox.Ok)
-                Gcd = G1dB/(1-math.exp(-k*float(D1)))
-                print(f'k = {k}, Gcd = {Gcd}')
-                x2 = np.arange(self.dists_3[0]/100, self.dists_3[-1]/100, 0.10)
-                self.approx = self.ax_4.plot(x2*100, Alfredo(k, Gcd, x2), label='Alfredo')
+                
 
         
     def empty_plot(self):
