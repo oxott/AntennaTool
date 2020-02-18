@@ -582,7 +582,7 @@
                  </size>
                 </property>
                 <property name="text">
-                 <string>Medição 1</string>
+                 <string>Medição 1:</string>
                 </property>
                </widget>
               </item>
@@ -601,6 +601,12 @@
               </item>
               <item>
                <widget class="QLabel" name="label_12">
+                <property name="maximumSize">
+                 <size>
+                  <width>52</width>
+                  <height>16</height>
+                 </size>
+                </property>
                 <property name="text">
                  <string>Perdas:</string>
                 </property>

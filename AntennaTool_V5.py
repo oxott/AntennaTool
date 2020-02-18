@@ -413,17 +413,22 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.label_9.setMaximumSize(QtCore.QSize(52, 16))
         self.label_9.setObjectName("label_9")
         self.verticalLayout_9.addWidget(self.label_9)
+        self.label_12 = QtWidgets.QLabel(self.tab_2)
+        self.label_12.setObjectName("label_12")
+        self.label_12.setMaximumSize(QtCore.QSize(52, 16))
+        self.verticalLayout_9.addWidget(self.label_12)
         self.horizontalLayout_9.addLayout(self.verticalLayout_9)
         self.verticalLayout_10 = QtWidgets.QVBoxLayout()
         self.verticalLayout_10.setObjectName("verticalLayout_10")
         self.line_med1 = QtWidgets.QLineEdit(self.tab_2)
         self.line_med1.setObjectName("line_med1")
-        self.line_med1.setReadOnly(True)
         self.verticalLayout_10.addWidget(self.line_med1)
         self.line_med2 = QtWidgets.QLineEdit(self.tab_2)
         self.line_med2.setObjectName("line_med2")
-        self.line_med2.setReadOnly(True)
         self.verticalLayout_10.addWidget(self.line_med2)
+        self.line_perdas = QtWidgets.QLineEdit(self.tab_2)
+        self.line_perdas.setObjectName("line_perdas")
+        self.verticalLayout_10.addWidget(self.line_perdas)
         self.horizontalLayout_9.addLayout(self.verticalLayout_10)
         self.verticalLayout_11 = QtWidgets.QVBoxLayout()
         self.verticalLayout_11.setObjectName("verticalLayout_11")
@@ -435,19 +440,36 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.estimate_gain_2_btn.setMaximumSize(QtCore.QSize(75, 20))
         self.estimate_gain_2_btn.setObjectName("estimate_gain_2_btn")
         self.verticalLayout_11.addWidget(self.estimate_gain_2_btn)
+        self.estimate_gain_3_btn = QtWidgets.QPushButton(self.tab_2)
+        self.estimate_gain_3_btn.setMaximumSize(QtCore.QSize(75, 20))
+        self.estimate_gain_3_btn.setObjectName("estimate_gain_3_btn")
+        self.verticalLayout_11.addWidget(self.estimate_gain_3_btn)
         self.horizontalLayout_9.addLayout(self.verticalLayout_11)
+        self.verticalLayout_13 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_13.setObjectName("verticalLayout_13")
+        self.label_11 = QtWidgets.QLabel(self.tab_2)
+        self.label_11.setObjectName("label_11")
+        self.verticalLayout_13.addWidget(self.label_11)
+        self.gainEstimateFrequency = QtWidgets.QComboBox(self.tab_2)
+        self.gainEstimateFrequency.setObjectName("gainEstimateFrequency")
+        self.verticalLayout_13.addWidget(self.gainEstimateFrequency)
+        self.horizontalLayout_9.addLayout(self.verticalLayout_13)
         self.gridLayout_8.addLayout(self.horizontalLayout_9, 0, 0, 1, 1)
         
-        self.canvas_5 = FigureCanvas(Figure(figsize=(7,7)))
+        self.canvas_5 = FigureCanvas(Figure(figsize=(7, 7)))
         self.ax_5 = self.canvas_5.figure.add_subplot(111)
         self.gridLayout_8.addWidget(self.canvas_5, 1, 0, 1, 1)
-        self.toolbar_5 = NavigationToolbar(self.canvas_4, self)
+        self.toolbar_5 = NavigationToolbar(self.canvas_5, self)
         self.gridLayout_8.addWidget(self.toolbar_5, 2, 0, 1, 1)
-        
-        
-        self.gridLayout_9.addLayout(self.gridLayout_8, 3, 0, 1, 1)
+        '''
+        self.graphicsView_estimativa = QtWidgets.QGraphicsView(self.tab_2)
+        self.graphicsView_estimativa.setObjectName("graphicsView_estimativa")
+        self.gridLayout_8.addWidget(self.graphicsView_estimativa, 1, 0, 1, 1)
+        '''
+        self.gridLayout_9.addLayout(self.gridLayout_8, 0, 0, 1, 1)
         self.tabWidget.addTab(self.tab_2, "")
-        self.gridLayout_3.addWidget(self.tabWidget, 3, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.tabWidget, 0, 0, 1, 1)
+        
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 782, 21))
@@ -500,11 +522,166 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.cb_Gain_2.activated.connect(self.GainEstimate)
         self.GainEstimateEnabled = False
         
+        self.estimate_gain_1_btn.clicked.connect(self.LoadGainMeasurement1)
+        self.estimate_gain_2_btn.clicked.connect(self.LoadGainMeasurement2)
+        self.estimate_gain_3_btn.clicked.connect(self.LoadGainLossMeasurement)
+        self.gainEstimateFrequency.activated.connect(self.EstimateGain)
+        
         self.folderLoaded = False
         self.folderLoaded_2 = False
         self.lossLoaded = False
         self.lossLoaded_perda = False
-        
+
+        self.med1Loaded = False
+        self.med2Loaded = False
+        self.medPerdaLoaded = False
+        self.scatGain = False
+
+    def EstimateGain(self):
+        if not self.med1Loaded:
+            QtWidgets.QMessageBox.information(None, QtWidgets.qApp.tr("Open File"),
+                                              QtWidgets.qApp.tr("Medição 1 não foi carregada corretamente!"),
+                                              QtWidgets.QMessageBox.Ok)
+        elif not self.med2Loaded:
+            QtWidgets.QMessageBox.information(None, QtWidgets.qApp.tr("Open File"),
+                                              QtWidgets.qApp.tr("Medição 2 não foi carregada corretamente!"),
+                                              QtWidgets.QMessageBox.Ok)
+        elif not self.medPerdaLoaded:
+            QtWidgets.QMessageBox.information(None, QtWidgets.qApp.tr("Open File"),
+                                              QtWidgets.qApp.tr("Medição de Perdas não foi carregada corretamente!"),
+                                              QtWidgets.QMessageBox.Ok)
+        else:
+            def func(k):
+                return G1dB*(1 - math.exp(-k*float(D2))) - G2dB*(1 - math.exp(-k*float(D1)))
+            
+            def Alfredo(k, gain, x):
+                return gain*(1 - np.exp(-k*x))
+            D1 = self.GainMed1_path.name.replace('.CSV', '')[-3:]
+            D2 = self.GainMed2_path.name.replace('.CSV', '')[-3:]
+            desFreq = round(float(self.gainEstimateFrequency.currentText())*1e9)
+            D1S21 = self.GainMed1[self.GainMed1.Frequency == float(desFreq)].S21.values[0]
+            D2S21 = self.GainMed2[self.GainMed2.Frequency == float(desFreq)].S21.values[0]
+            #D1S21 = S21D1[S21D1.Distancia == float(D1)].S21.values[0]
+            #D2S21 = S21D2[S21D2.Distancia == float(D2)].S21.values[0]
+            D1 = float(D1)/100
+            D2 = float(D2)/100
+            perda = self.funcaoPerdaGain(desFreq/1e9)
+           
+            
+            D1S21W = dBm2W(D1S21 - perda)
+            D2S21W = dBm2W(D2S21 - perda)
+            
+            lmbda = 3e8/desFreq
+            G1 = np.sqrt(D1S21W)*(4*np.pi*float(D1))/lmbda
+            G2 = np.sqrt(D2S21W)*(4*np.pi*float(D2))/lmbda
+            
+            
+            if float(D1) != 0.0 and float(D2) != 0.0 and D1 != D2:
+                G1dB = 10*np.log10(G1)
+                G2dB = 10*np.log10(G2)
+                if self.scatGain:
+                    print('Tem Scat', self.scatGain)
+                    self.scatGain.remove()
+                    #self.approxGain.pop(0).remove()
+                    self.canvas_5.draw_idle()
+                self.scatGain = self.ax_5.scatter([float(D1)*100, float(D2)*100], [G1dB, G2dB], label='Medições')
+                print(self.scatGain)
+                self.canvas_5.draw_idle()
+                #print(f'\nOrigi = {D1S21}, perda = {perda}, S21 = {D1S21 - perda}, S21W = {D1S21W}, dist = {D1}, ganho = {G1dB}')
+                #print(f'Origi = {D2S21}, perda = {perda},S21 = {D2S21 - perda}, S21W = {D2S21W}, dist = {D2}, ganho = {G2dB}')
+                kmax = [0.1, 1000]
+                try:
+                    sol = root_scalar(func, method='toms748', bracket = kmax)
+                    k = sol.root
+                    Gcd = G1dB/(1-math.exp(-k*float(D1)))
+                    print(f'k = {k}, Gcd = {Gcd}')
+                    x2 = np.arange(0, 6, 0.10)
+                    self.approxGain = self.ax_5.plot(x2*100, Alfredo(k, Gcd, x2), label=f'G = {round(Gcd,2)} dB')
+                    legenda = self.ax_5.legend(bbox_to_anchor=(0, 1.02, 1, .102), borderaxespad=0, loc="right")
+                    legenda.set_draggable(True)
+                except:
+                    pass
+                    QtWidgets.QMessageBox.information(None, QtWidgets.qApp.tr("Estimativa Erro"),
+                                              QtWidgets.qApp.tr("Não foi possível achar uma solução para k = [0.1, 1000]"),
+                                              QtWidgets.QMessageBox.Ok)
+
+    def LoadGainMeasurement1(self):
+        root = tk.Tk()
+        root.withdraw()
+        self.GainMed1_path = filedialog.askopenfile()
+        try:
+            self.GainMed1= pd.read_csv(self.GainMed1_path, header=2, engine='python')
+            self.line_med1.setText(self.GainMed1_path.name)
+            dist1 = self.GainMed1_path.name.replace('.CSV', '')[-3:]
+            self.GainMed1.rename(columns = {self.GainMed1.columns[1]: 'S21', self.GainMed1.columns[2]: 'Phase'}, inplace = True)
+            self.gainFreq1 = self.GainMed1.Frequency.unique()/1e9
+            print(f'Frequências 1 = {self.gainFreq1}')
+           # self.freq_loss = self.df_4.iloc[:,0]/1e9
+            #self.loss = self.df_4.iloc[:,1]
+
+            #nada, fon, self.funcao_perda = graficoBunito(self.freq_loss, self.loss, self.freq_loss.size*3)
+
+            self.med1Loaded = True
+        except:
+            pass
+            QtWidgets.QMessageBox.information(None, QtWidgets.qApp.tr("Open File"),
+                                              QtWidgets.qApp.tr("Erro ao abrir Medição 1!"),
+                                              QtWidgets.QMessageBox.Ok)
+
+    def LoadGainMeasurement2(self):
+        root = tk.Tk()
+        root.withdraw()
+        self.GainMed2_path = filedialog.askopenfile()
+        try:
+            self.GainMed2= pd.read_csv(self.GainMed2_path, header=2, engine='python')
+            self.line_med2.setText(self.GainMed2_path.name)
+            dist1 = self.GainMed2_path.name.replace('.CSV', '')[-3:]
+            self.GainMed2.rename(columns = {self.GainMed2.columns[1]: 'S21', self.GainMed2.columns[2]: 'Phase'}, inplace = True)
+            self.gainFreq2 = self.GainMed2.Frequency.unique()/1e9
+            print(f'Frequências 1 = {self.gainFreq2}')
+           # self.freq_loss = self.df_4.iloc[:,0]/1e9
+            #self.loss = self.df_4.iloc[:,1]
+
+            #nada, fon, self.funcao_perda = graficoBunito(self.freq_loss, self.loss, self.freq_loss.size*3)
+
+            self.med2Loaded = True
+        except:
+            pass
+            QtWidgets.QMessageBox.information(None, QtWidgets.qApp.tr("Open File"),
+                                              QtWidgets.qApp.tr("Erro ao abrir Medição 2!"),
+                                              QtWidgets.QMessageBox.Ok)
+    
+        if self.med1Loaded and self.med2Loaded:
+            print('Ambas Medições Carregadas')
+            if np.array_equal(self.gainFreq1, self.gainFreq2):
+                self.gainEstimateFrequency.clear()
+                self.gainEstimateFrequency.addItems([str(freq) for freq in self.gainFreq1])
+            else:
+                QtWidgets.QMessageBox.information(None, QtWidgets.qApp.tr("Open File"),
+                                              QtWidgets.qApp.tr("As medições não possuem o mesmo range de frequências medidas!"),
+                                              QtWidgets.QMessageBox.Ok)
+
+    def LoadGainLossMeasurement(self):
+        root = tk.Tk()
+        root.withdraw()
+        self.gainPerdaPath = filedialog.askopenfile()
+        try:
+            self.gainPerda= pd.read_csv(self.gainPerdaPath, header=2, engine='python')
+            self.line_perdas.setText(self.gainPerdaPath.name)
+            self.gainPerda.rename(columns = {self.gainPerda.columns[1]: 'S21', self.gainPerda.columns[2]: 'Phase'}, inplace = True)
+            print(self.gainPerda)
+            freq_loss = self.gainPerda.iloc[:,0]/1e9
+            loss = self.gainPerda.iloc[:,1]
+
+            _, _, self.funcaoPerdaGain = graficoBunito(freq_loss, loss, freq_loss.size*3)
+
+            self.medPerdaLoaded = True
+        except:
+            pass
+            QtWidgets.QMessageBox.information(None, QtWidgets.qApp.tr("Open Folder"),
+                                              QtWidgets.qApp.tr("Erro ao abrir Arquivo de Perda!"),
+                                              QtWidgets.QMessageBox.Ok)
+
     def GainEstimateEnabled(self, state):
         if state == Qt.Checked:
             self.GainEstimateEnabled = True
@@ -513,6 +690,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.GainEstimateEnabled = False
             print(self.GainEstimateEnabled)
         self.scat = 0
+
     def GainEstimate(self):
         if self.folderLoaded == False:
             QtWidgets.QMessageBox.information(None, QtWidgets.qApp.tr("Open Folder"),
@@ -556,8 +734,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                     self.scat.remove()
                     self.approx.pop(0).remove()
                     self.canvas_4.draw_idle()
-                self.scat = self.ax_4.scatter([float(D1)*100, float(D2)*100], [G1dB, G2dB])
-                print(self.scat)
+                self.scat = self.ax_4.scatter([float(D1)*100, float(D2)*100], [G1dB, G2dB], label='Medições')
+                #print(self.scatGain)
                 self.canvas_4.draw_idle()
                 #print(f'\nOrigi = {D1S21}, perda = {perda}, S21 = {D1S21 - perda}, S21W = {D1S21W}, dist = {D1}, ganho = {G1dB}')
                 #print(f'Origi = {D2S21}, perda = {perda},S21 = {D2S21 - perda}, S21W = {D2S21W}, dist = {D2}, ganho = {G2dB}')
@@ -568,16 +746,16 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                     Gcd = G1dB/(1-math.exp(-k*float(D1)))
                     print(f'k = {k}, Gcd = {Gcd}')
                     x2 = np.arange(self.dists_3[0]/100, self.dists_3[-1]/100, 0.10)
-                    self.approx = self.ax_4.plot(x2*100, Alfredo(k, Gcd, x2), label='Alfredo')
+                    self.approx = self.ax_4.plot(x2*100, Alfredo(k, Gcd, x2), label=f'G = {round(Gcd,2)} dB')
                     self.line_Gain_Output.setText(f'{round(Gcd, 2)} dB')
+                    legenda = self.ax_4.legend(bbox_to_anchor=(0, 1.02, 1, .102), borderaxespad=0, loc="right")
+                    legenda.set_draggable(True)
                 except:
                     pass
                     QtWidgets.QMessageBox.information(None, QtWidgets.qApp.tr("Estimativa Erro"),
                                               QtWidgets.qApp.tr("Não foi possível achar uma solução para k = [0.1, 1000]"),
                                               QtWidgets.QMessageBox.Ok)
                 
-
-        
     def empty_plot(self):
         self.ax.cla()
         self.ax.set_theta_zero_location("N")
@@ -1012,10 +1190,13 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.hold_3.setText(_translate("MainWindow", "Hold"))
         self.clearBtn_4.setText(_translate("MainWindow", "Limpar"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Ganho"))
-        self.label_8.setText(_translate("MainWindow", "Medição 1"))
+        self.label_8.setText(_translate("MainWindow", "Medição 1:"))
         self.label_9.setText(_translate("MainWindow", "Medição 2:"))
+        self.label_12.setText(_translate("MainWindow", "Perdas:"))
         self.estimate_gain_1_btn.setText(_translate("MainWindow", "Browse"))
         self.estimate_gain_2_btn.setText(_translate("MainWindow", "Browse"))
+        self.estimate_gain_3_btn.setText(_translate("MainWindow", "Browse"))
+        self.label_11.setText(_translate("MainWindow", "Frequência [GHz]:"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Estimativa de Ganho"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuHelp.setTitle(_translate("MainWindow", "Help"))
