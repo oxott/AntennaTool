@@ -24,7 +24,7 @@
        <enum>Qt::NoFocus</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="diagRad">
        <attribute name="title">
@@ -427,7 +427,7 @@
             <enum>Qt::Vertical</enum>
            </property>
           </widget>
-          <widget class="QWidget" name="">
+          <widget class="QWidget" name="layoutWidget">
            <layout class="QGridLayout" name="gridLayout_6">
             <item row="0" column="0">
              <layout class="QVBoxLayout" name="verticalLayout_12">
@@ -582,7 +582,7 @@
                  </size>
                 </property>
                 <property name="text">
-                 <string>Medição 1</string>
+                 <string>Medição 1:</string>
                 </property>
                </widget>
               </item>
@@ -599,6 +599,19 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QLabel" name="label_12">
+                <property name="maximumSize">
+                 <size>
+                  <width>52</width>
+                  <height>16</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Perdas:</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
@@ -608,6 +621,9 @@
               </item>
               <item>
                <widget class="QLineEdit" name="line_med2"/>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="line_perdas"/>
               </item>
              </layout>
             </item>
@@ -638,6 +654,33 @@
                  <string>Browse</string>
                 </property>
                </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="estimate_gain_3_btn">
+                <property name="maximumSize">
+                 <size>
+                  <width>75</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Browse</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_13">
+              <item>
+               <widget class="QLabel" name="label_11">
+                <property name="text">
+                 <string>Frequência [GHz]:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="gainEstimateFrequency"/>
               </item>
              </layout>
             </item>
